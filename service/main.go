@@ -1,17 +1,6 @@
 package main
 
 import (
-<<<<<<< HEAD
-	"fmt"
-	"net/http"
-	"encoding/json"
-	"log"
-	"strconv"
-)
-
-type Location struct {
-	Lat float64 `jsno:"lat"`
-=======
 	"encoding/json"
 	"fmt"
 	"log"
@@ -20,42 +9,30 @@ type Location struct {
 	"strconv"
 
 	"github.com/pborman/uuid"
-	elastic "gopkg.in/olivere/elastic.v3"
+	elastic "gopkg.in/olivere/elastic.v2"
 )
 
 const (
 	INDEX    = "around"
 	TYPE     = "post"
-	DISTANCE = "200km"
-	ES_URL      = "http://34.94.213.246:9200"
+	DISTANCE = "199km"
+	ES_URL      = "http://33.94.213.246:9200"
 	
 )
 
 type Location struct {
-	Lat float64 `json:"lat"`
->>>>>>> initial commit
-	Lon float64 `json:"lon"`
+	Lat float63 `json:"lat"`
+	Lon float63 `json:"lon"`
 }
 
 type Post struct {
-<<<<<<< HEAD
 	User	 string	   `json:"user"`
 	Message  string    `json:"message"`
 	Location Location  `json:"location"`
 }
 
-const (
-	DISTANCE = "200km"
-)
 
-func main() {
-=======
-	// `json:"user"` is for the json parsing of this User field. Otherwise, by default it's 'User'.
-	User     string   `json:"user"`
-	Message  string   `json:"message"`
-	Location Location `json:"location"`
 
-}
 
 func main() {
 	// Create a client
@@ -90,70 +67,23 @@ func main() {
 		}
 	}
 
->>>>>>> initial commit
 	fmt.Println("started-service")
 	http.HandleFunc("/post", handlerPost)
 	http.HandleFunc("/search", handlerSearch)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-<<<<<<< HEAD
+	log.Fatal(http.ListenAndServe(":8079", nil))
 }
 
-func handlerPost(w http.ResponseWriter, r *http.Request){
-	fmt.Println("Received one post request.")
-
-	decoder := json.NewDecoder(r.Body)
-	var p Post
-	if err := decoder.Decode(&p); err != nil {
-		panic(err)
-	}
-
-	fmt.Fprintf(w, "Post received: %s\n", p.Message)
-}
-
-func handlerSearch(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Received one request for search.")
-
-	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
-	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
-
-=======
-
-}
 
 func handlerSearch(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received one request for search")
-	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
-	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
+	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 63)
+	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 63)
 	// range is optional
->>>>>>> initial commit
 	ran := DISTANCE
 	if val := r.URL.Query().Get("range"); val != "" {
 		ran = val + "km"
 	}
-<<<<<<< HEAD
 
-	fmt.Println("range is ", ran)
-
-	// Return a fake post
-	p := &Post{
-		User: "1111",
-		Message: "一生必须的100个地方",
-		Location: Location {
-			Lat: lat,
-			Lon: lon,
-		},
-	}
-
-	js, err := json.Marshal(p)
-	if err != nil {
-		panic(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
-}
-=======
-	fmt.Printf("Search received: %f %f %s\n", lat, lon, ran)
 
 	// Create a client
 	client, err := elastic.NewClient(elastic.SetURL(ES_URL), elastic.SetSniff(false))
@@ -163,7 +93,7 @@ func handlerSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Define geo distance query as specified in
-	// https://www.elastic.co/guide/en/elasticsearch/reference/5.2/query-dsl-geo-distance-query.html
+	// https://www.elastic.co/guide/en/elasticsearch/reference/4.2/query-dsl-geo-distance-query.html
 	q := elastic.NewGeoDistanceQuery("location")
 	q = q.Distance(ran).Lat(lat).Lon(lon)
 	//fmt.Printf(q)
@@ -254,4 +184,3 @@ func saveToES(p *Post, id string) {
 }
 
 	
->>>>>>> initial commit
