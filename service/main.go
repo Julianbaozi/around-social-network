@@ -15,14 +15,14 @@ import (
 const (
 	INDEX    = "around"
 	TYPE     = "post"
-	DISTANCE = "199km"
-	ES_URL      = "http://33.94.213.246:9200"
+	DISTANCE = "200km"
+	ES_URL   = "http://34.94.213.246:9200"
 	
 )
 
 type Location struct {
-	Lat float63 `json:"lat"`
-	Lon float63 `json:"lon"`
+	Lat float64 `json:"lat"`
+	Lon float64 `json:"lon"`
 }
 
 type Post struct {
@@ -76,8 +76,8 @@ func main() {
 
 func handlerSearch(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received one request for search")
-	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 63)
-	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 63)
+	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
+	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
 	// range is optional
 	ran := DISTANCE
 	if val := r.URL.Query().Get("range"); val != "" {
