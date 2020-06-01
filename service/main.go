@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/pborman/uuid"
-	elastic "gopkg.in/olivere/elastic.v3"
+	elastic "gopkg.in/olivere/elastic.v2"
 )
 
 const (
@@ -70,14 +70,14 @@ func main() {
 	fmt.Println("started-service")
 	http.HandleFunc("/post", handlerPost)
 	http.HandleFunc("/search", handlerSearch)
-	log.Fatal(http.ListenAndServe(":8079", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 
 func handlerSearch(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received one request for search")
-	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
-	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
+	lat, _ := strconv.ParseFloat(r.URL.Query().Get("lat"), 63)
+	lon, _ := strconv.ParseFloat(r.URL.Query().Get("lon"), 63)
 	// range is optional
 	ran := DISTANCE
 	if val := r.URL.Query().Get("range"); val != "" {
