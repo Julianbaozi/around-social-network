@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/pborman/uuid"
-	elastic "gopkg.in/olivere/elastic.v2"
+	elastic "gopkg.in/olivere/elastic.v3"
 )
 
 const (
