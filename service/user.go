@@ -1,33 +1,26 @@
 package main
 
 import (
-	elastic "gopkg.in/olivere/elastic.v3"
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "reflect"
+    "time"
 
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"reflect"
-	"regexp"
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
+    elastic "gopkg.in/olivere/elastic.v3"
+    "github.com/dgrijalva/jwt-go"
 )
 
 const (
 	TYPE_USER = "user"
 )
 
-var (
-	usernamePattern = regexp.MustCompile(`^[a-z0-9_]+$`).MatchString
-)
-
 type User struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Age      int    `json:"age"`
-	Gender   string `json:"gender"`
+	Age int `json:”age”`
+	Gender string `json:”gender”`
 }
-
 // checkUser checks whether user is valid
 func checkUser(username, password string) bool {
 	es_client, err := elastic.NewClient(elastic.SetURL(ES_URL), elastic.SetSniff(false))
@@ -56,15 +49,17 @@ func checkUser(username, password string) bool {
 	// If no user exist, return false.
 	return false
 }
-
 // add user adds a new user
 func addUser(user User) bool {
+	// In theory, BigTable is a better option for storing user credentials than ES. However,
+	// since BT is more expensive than ES so usually students will disable BT.
 	es_client, err := elastic.NewClient(elastic.SetURL(ES_URL), elastic.SetSniff(false))
 	if err != nil {
 		fmt.Printf("ES is not setup %v\n", err)
 		return false
 	}
 
+	// Search with a term query
 	termQuery := elastic.NewTermQuery("username", user.Username)
 	queryResult, err := es_client.Search().
 		Index(INDEX).
@@ -77,10 +72,11 @@ func addUser(user User) bool {
 	}
 
 	if queryResult.TotalHits() > 0 {
-		fmt.Printf("User %s already exists, cannot create duplicate user.\n", user.Username)
+		fmt.Printf("User %s has existed, cannot create duplicate user.\n", user.Username)
 		return false
 	}
 
+	// Save it to index
 	_, err = es_client.Index().
 		Index(INDEX).
 		Type(TYPE_USER).
@@ -89,10 +85,9 @@ func addUser(user User) bool {
 		Refresh(true).
 		Do()
 	if err != nil {
-		fmt.Printf("ES save user failed %v\n", err)
+		fmt.Printf("ES save failed %v\n", err)
 		return false
 	}
-
 	return true
 }
 
@@ -107,7 +102,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if u.Username != "" && u.Password != "" && usernamePattern(u.Username) {
+	if u.Username != "" && u.Password != "" {
 		if addUser(u) {
 			fmt.Println("User added successfully.")
 			w.Write([]byte("User added successfully."))
